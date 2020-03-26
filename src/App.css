@@ -1,5 +1,24 @@
 .top-bar {
-    width: 100%;
+    position: fixed;
+    left: -5px;
+    box-sizing: border-box;
     display: flex;
     justify-content: flex-end;
+    align-items: center;
+    padding: 5px 10px 5px 5px;
+    box-shadow: 0 0 8px #000000bb;
+    background-color: #005380;
+    border-bottom: 1px solid #007CBF;
+    z-index: 10;
+    width: calc(100% + 10px);
+    height: 48px;
+}
+
+.app-body {
+    height: 4000px;
+    background-color: #00aa77;
+    background-image: url("ZenBG-1.png"), url("ZenBG-2.png");
+    background-repeat: repeat-x, repeat;
+    z-index: 0;
+
 }

@@ -1,16 +1,14 @@
-import './Style/OverlayComponent.css';
-import React from 'react';
+import "./Style/OverlayComponent.css";
+import React from "react";
 
-const OverlayComponent = (props) => {
+const OverlayComponent = props => {
     return (
         <div className="background">
-            <div className={props.childDisplay}>
-                {props.children}
-            </div>
+            <div className={props.childDisplay}>{props.children}</div>
         </div>
     );
-}
-OverlayComponent.defaultProps= {
+};
+OverlayComponent.defaultProps = {
     childDisplay: ""
-}
+};
 export default OverlayComponent;
