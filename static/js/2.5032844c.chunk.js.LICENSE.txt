@@ -4,6 +4,8 @@ object-assign
 @license MIT
 */
 
+/*! https://mths.be/scrollingelement v1.5.2 by @diegoperini & @mathias | MIT license */
+
 /** @license React v0.19.1
  * scheduler.production.min.js
  *
