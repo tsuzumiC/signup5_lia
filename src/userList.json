@@ -1,0 +1,22 @@
+{
+    "users": [{
+            "name": "Anna",
+            "name-long": "Anna Björn",
+            "id": 1,
+            "email": "anna.bjorn@gmail.com",
+            "password": "4nn4b34r"
+        },
+        {
+            "name": "Per",
+            "name-long": "Per Eriksson",
+            "id": 2,
+            "email": "per@erikssonsab.se",
+            "password": "notSafe"
+        },
+        {
+            "id": 3,
+            "email": "a@b.c",
+            "password": "abc"
+        }
+    ]
+}
