@@ -1,13 +1,13 @@
 import "./Style/LoginBar.css";
 
 import React from "react";
-import { connect } from "react-redux";
+import { useQuery } from "react-apollo";
 
 import { Button } from "./Inputs";
-import { logOut } from "../actions";
+import { LOGGED_IN_USER } from "../quries";
 
 const LoginBar = (props) => {
-    return props.loggedInUser.id > 0 ? (
+    return useQuery(LOGGED_IN_USER).id > 0 ? (
         <Button
             onClick={() => props.logOut()}
             value="Log out"
@@ -29,8 +29,4 @@ const LoginBar = (props) => {
     );
 };
 
-const mapStateToProps = (state) => {
-    return { loggedInUser: state.loggedInUser };
-};
-
-export default connect(mapStateToProps, { logOut })(LoginBar);
+export default LoginBar;

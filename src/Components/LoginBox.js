@@ -1,10 +1,10 @@
 import "./Style/LoginBoxComponent.css";
 
 import React, { Component } from "react";
-import { connect } from "react-redux";
+import { useApolloClient, useQuery } from "@apollo/react-hooks";
 
 import { Button, Submit, Field } from "./Inputs";
-import { tryLogin, logOut } from "../actions";
+import { TRY_LOGIN, LOGGED_IN_USER } from "../quries";
 
 class LoginBoxComponent extends Component {
     state = {
@@ -24,15 +24,22 @@ class LoginBoxComponent extends Component {
         } else if (!this.state.password) {
             this.setState({ message: "Password is required." });
         } else {
-            this.setState({ message: "" });
-            this.props.tryLogin(this.state.email, this.state.password);
+            const { data, error } = useQuery(TRY_LOGIN, {
+                variables: { email: this.state.email },
+            });
+            if (error) {
+                this.setState({ message: "Invalid email or password" });
+            } else {
+                this.setState({ message: "" });
+                // const client = useApolloClient();
+                this.client.writeData({ data: { loggedInUser: { data } } });
+            }
         }
     };
 
     handleChange = (e) => {
         this.setState({ [e.target.name]: e.target.value });
         if (this.props.loggedInUser.id === 0) {
-            this.props.logOut();
             this.setState({ message: "" });
         }
     };
@@ -59,8 +66,9 @@ class LoginBoxComponent extends Component {
     };
 
     render() {
-        let message =
-            this.props.loggedInUser.id === 0 && this.props.loggedInUser.name;
+        /* let { data } = useQuery(LOGGED_IN_USER);
+        let message = data.id === 0 ? "Invalid email or password" : null; */
+        let message;
         return (
             <div className="login-box">
                 <form className="form-container" onSubmit={this.handleSubmit}>
@@ -102,10 +110,4 @@ class LoginBoxComponent extends Component {
     }
 }
 
-const mapStateToProps = (state) => {
-    return { loggedInUser: state.loggedInUser };
-};
-
-export default connect(mapStateToProps, { tryLogin, logOut })(
-    LoginBoxComponent
-);
+export default LoginBoxComponent;
