@@ -60,6 +60,7 @@ export const GET_EVENT_BY_ID = gql`
                     first_name
                     last_name
                 }
+                event_id
                 attendance
             }
         }
@@ -71,7 +72,34 @@ export const LOGGED_IN_USER = gql`
     query loggedInUser {
         loggedInUser @client {
             id
-            __typename
+        }
+    }
+`;
+
+export const GET_STORED_EVENT = gql`
+    query getStoredEvent {
+        storedEvent @client {
+            id
+            title
+            host {
+                id
+                first_name
+                last_name
+            }
+            description
+            date_of_event
+            time_of_event
+            location
+            invitations {
+                id
+                guest {
+                    id
+                    first_name
+                    last_name
+                }
+                event_id
+                attendance
+            }
         }
     }
 `;

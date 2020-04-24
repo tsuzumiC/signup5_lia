@@ -60,7 +60,7 @@ const LoginBoxComponent = () => {
             <form className="form-container" onSubmit={handleSubmit}>
                 <Field
                     type="email"
-                    name="email"
+                    id="email"
                     value={email}
                     onChange={handleChange}
                     labelText="E-mail"
@@ -70,7 +70,7 @@ const LoginBoxComponent = () => {
                 />
                 <Field
                     type="password"
-                    name="password"
+                    id="password"
                     value={password}
                     onChange={handleChange}
                     labelText="Password"
@@ -85,10 +85,10 @@ const LoginBoxComponent = () => {
                     <Button
                         value="Cancel"
                         onClick={this.handleCancle}
-                        name="cancel"
+                        id="cancel"
                         cssButton="cancel"
                     />
-                    <Submit value="Login" name="login" cssButton="login" />
+                    <Submit value="Login" id="login" cssButton="login" />
                 </div>
             </form>
         </div>

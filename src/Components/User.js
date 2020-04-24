@@ -8,7 +8,6 @@ const response = {
     NO_RESPONSE: "Not responded.",
 };
 const User = (props) => {
-    const handleClick = (event) => {};
     const { fname, lname, attendance, comment } = props;
     return (
         <div>
@@ -21,7 +20,6 @@ const User = (props) => {
                         <i className="fas fa-check"></i>
                         <div>{response[attendance]}</div>
                         <i
-                            onClick={handleClick}
                             className="fas fa-user-edit"
                             style={{ cursor: "pointer" }}
                         ></i>

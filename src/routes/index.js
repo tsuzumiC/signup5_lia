@@ -1,2 +1,2 @@
-export { Home } from "./Home";
-export { Events } from "./Events";
+export { Events } from "../Components/Events";
+export { Home } from "../Components/Home";
