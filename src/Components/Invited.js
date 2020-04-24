@@ -1,25 +1,26 @@
 import React from "react";
-import ListGroup from "react-bootstrap/ListGroup";
+
 import User from "./User";
 
 const Invitation = (props) => {
     const invitationList = props.invited.map((invited) => {
         return (
-            <ListGroup.Item>
-                <User
-                    fname={invited.guest.first_name}
-                    lname={invited.guest.last_name}
-                    attendance={invited.attendance}
-                    comment="WIP"
-                />
-            </ListGroup.Item>
+            <ul className="list-group">
+                <li
+                    key={invited.id}
+                    className="list-group-item list-group-item-warning"
+                >
+                    <User
+                        fname={invited.guest.first_name}
+                        lname={invited.guest.last_name}
+                        attendance={invited.attendance}
+                        comment="WIP"
+                    />
+                </li>
+            </ul>
         );
     });
-    return (
-        <div>
-            <ListGroup>{invitationList}</ListGroup>
-        </div>
-    );
+    return <div className="list-group">{invitationList}</div>;
 };
 
 export default Invitation;
