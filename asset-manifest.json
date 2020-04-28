@@ -1,14 +1,14 @@
 {
   "files": {
     "main.css": "/signup5_lia/static/css/main.d3671095.chunk.css",
-    "main.js": "/signup5_lia/static/js/main.3525606b.chunk.js",
-    "main.js.map": "/signup5_lia/static/js/main.3525606b.chunk.js.map",
+    "main.js": "/signup5_lia/static/js/main.4b5da085.chunk.js",
+    "main.js.map": "/signup5_lia/static/js/main.4b5da085.chunk.js.map",
     "runtime-main.js": "/signup5_lia/static/js/runtime-main.0a3bb5ac.js",
     "runtime-main.js.map": "/signup5_lia/static/js/runtime-main.0a3bb5ac.js.map",
     "static/js/2.651c1a8d.chunk.js": "/signup5_lia/static/js/2.651c1a8d.chunk.js",
     "static/js/2.651c1a8d.chunk.js.map": "/signup5_lia/static/js/2.651c1a8d.chunk.js.map",
     "index.html": "/signup5_lia/index.html",
-    "precache-manifest.f9a04f3a61b6a9b8441cbb364563c992.js": "/signup5_lia/precache-manifest.f9a04f3a61b6a9b8441cbb364563c992.js",
+    "precache-manifest.92098945329cbfb0993627e7f059f0e6.js": "/signup5_lia/precache-manifest.92098945329cbfb0993627e7f059f0e6.js",
     "service-worker.js": "/signup5_lia/service-worker.js",
     "static/css/main.d3671095.chunk.css.map": "/signup5_lia/static/css/main.d3671095.chunk.css.map",
     "static/js/2.651c1a8d.chunk.js.LICENSE.txt": "/signup5_lia/static/js/2.651c1a8d.chunk.js.LICENSE.txt"
@@ -17,6 +17,6 @@
     "static/js/runtime-main.0a3bb5ac.js",
     "static/js/2.651c1a8d.chunk.js",
     "static/css/main.d3671095.chunk.css",
-    "static/js/main.3525606b.chunk.js"
+    "static/js/main.4b5da085.chunk.js"
   ]
 }
