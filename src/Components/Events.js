@@ -6,27 +6,27 @@ import {
     useLocation,
     useRouteMatch,
 } from "react-router-dom";
-import { useLazyQuery, useApolloClient, useQuery } from "@apollo/react-hooks";
+import { useLazyQuery } from "@apollo/react-hooks";
 
-import { GET_EVENT_BY_ID, GET_STORED_EVENT } from "../gql/queries";
+import { GET_EVENT_BY_ID } from "../gql/queries";
 
 import EventInfo from "./EventInfo";
 import Invited from "./Invited";
 import Attendance from "./Attendance";
-import { eventDefault } from "../defaults";
 
 export const Events = () => {
     let response = null,
-        eventData = eventDefault;
+        eventData = null;
 
     const location = useLocation(),
         address = location.pathname,
         match = useRouteMatch(),
-        client = useApolloClient();
+        eventMatch = new RegExp("^/events/[0-9]+/*$"),
+        inviteMatch = new RegExp("^/events/[0-9]+/[0-9]+/*$");
 
     const [values, setValues] = useState({
         eventId: "",
-        storedEvent: useQuery(GET_STORED_EVENT).data.storedEvent,
+        storedEvent: null,
     });
     const [getEvent, { loading, error, data }] = useLazyQuery(GET_EVENT_BY_ID);
 
@@ -39,20 +39,16 @@ export const Events = () => {
         },
         handleSubmit = (event) => {
             event.preventDefault();
-            if (!values.storedEvent) {
-                getEvent({ variables: { id: values.eventId } });
-            } else if (values.storedEvent.id !== values.eventId) {
+            if (
+                !values.storedEvent ||
+                values.storedEvent.id !== values.eventId
+            ) {
                 getEvent({ variables: { id: values.eventId } });
             }
         };
 
     if (loading) {
-        response =
-            location.pathname === match.path ? (
-                <p>Loading...</p>
-            ) : (
-                <Redirect to={match.path} />
-            );
+        response = <p>Loading...</p>;
     }
 
     if (error) {
@@ -61,28 +57,28 @@ export const Events = () => {
 
     if (data) {
         eventData = data.getEventById;
-        if (!values.storedEvent) {
-            setValues((values) => ({ ...values, storedEvent: eventData }));
-            client.writeData({ data: { storedEvent: eventData } });
-        } else if (eventData.id !== values.storedEvent.id) {
-            setValues((values) => ({ ...values, storedEvent: eventData }));
-            client.writeData({ data: { storedEvent: eventData } });
+        if (!values.storedEvent || eventData.id !== values.storedEvent.id) {
+            setValues((values) => ({
+                ...values,
+                storedEvent: eventData,
+            }));
         }
-    } else if (!address.endsWith("events")) {
-        let tempAddress = "";
-        if (address.endsWith("/")) {
-            tempAddress = address.slice(0, address.lastIndexOf("/"));
-            tempAddress = tempAddress.slice(tempAddress.lastIndexOf("/") + 1);
-        } else {
-            tempAddress = address.slice(address.lastIndexOf("/") + 1);
+    } else if (!values.storedEvent && !loading && !error) {
+        if (eventMatch.test(address)) {
+            getEvent({ variables: { id: address.match(/[0-9]+/)[0] } });
+        } else if (inviteMatch.test(address)) {
+            getEvent({ variables: { id: address.match(/[0-9]+/)[0] } });
         }
-        getEvent({ variables: { id: tempAddress } });
-        response = <Redirect to={match.path} />;
     }
 
-    if (values.storedEvent !== null) {
-        response = <Redirect to={`${match.path}/${values.storedEvent.id}`} />;
+    if (values.storedEvent) {
+        if (!inviteMatch.test(address)) {
+            response = (
+                <Redirect to={`${match.path}/${values.storedEvent.id}`} />
+            );
+        }
     }
+
     return (
         <div>
             <form onSubmit={handleSubmit}>
@@ -99,10 +95,12 @@ export const Events = () => {
             <div>{response}</div>
             <Switch>
                 <Route path={`${match.path}/:eventId`}>
-                    <Event event={eventData} />
+                    {values.storedEvent ? (
+                        <Event event={values.storedEvent} />
+                    ) : null}
                 </Route>
                 <Route path={match.path}>
-                    {<h3>Please enter an Event ID (1-10)</h3>}
+                    {loading ? null : <h3>Please enter an Event ID (1-10)</h3>}
                 </Route>
             </Switch>
         </div>
@@ -110,25 +108,31 @@ export const Events = () => {
 };
 
 const Event = (props) => {
-    const match = useRouteMatch();
+    const match = useRouteMatch(),
+        location = useLocation().pathname,
+        regEx = new RegExp("events/[0-9]+/[0-9]+");
     return (
         <>
             <EventInfo event={props.event} />
             <Switch>
+                <Route path={`${match.path}/:inviteId`}>
+                    {regEx.test(location) ? (
+                        <Attendance
+                            invite={props.event.invitations.find((invite) => {
+                                return (
+                                    invite.id ===
+                                    location.slice(
+                                        location.lastIndexOf("/") + 1
+                                    )
+                                );
+                            })}
+                        />
+                    ) : (
+                        <div>Loading</div>
+                    )}
+                </Route>
                 <Route path={match.path}>
                     <Invited invited={props.event.invitations} />
-                </Route>
-                <Route path={`${match.path}/:inviteId`}>
-                    <Attendance
-                        invite={props.event.invitations.find((invite) => {
-                            return (
-                                invite.id ===
-                                match.path.slice(
-                                    match.path.lastIndexOf("/") + 1
-                                )
-                            );
-                        })}
-                    />
                 </Route>
             </Switch>
         </>

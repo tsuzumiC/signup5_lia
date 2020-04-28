@@ -40,6 +40,7 @@ export const Radio = (props) => {
                 name={props.name ? props.name : props.id}
                 value={props.value}
                 onChange={props.onChange}
+                checked={props.compare === props.value}
             />
         </>
     );
@@ -71,9 +72,4 @@ export const Field = (props) => {
             />
         </div>
     );
-};
-
-Field.defaultProps = {
-    type: "text",
-    name: "field",
 };

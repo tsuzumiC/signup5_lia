@@ -10,7 +10,7 @@ import App from "./App";
 const cache = new InMemoryCache({ addTypename: false });
 const link = new HttpLink({
     //headers: { authorization: localStorage.getItem("id") },
-    uri: "https://signup5.herokuapp.com/graphql/",
+    uri: "https://signup5lia.herokuapp.com/graphql/",
 });
 const client = new ApolloClient({
     cache,

@@ -1,8 +1,8 @@
 import { gql } from "apollo-boost";
 
-export const GET_ALL_PERSONS = gql`
-    query getAllPersons {
-        getAllPersons {
+export const GET_USERS = gql`
+    query getUsers {
+        getUsers {
             id
             email
             first_name
@@ -11,9 +11,9 @@ export const GET_ALL_PERSONS = gql`
     }
 `;
 
-export const GET_PERSON_BY_ID = gql`
-    query getPersonById($id: Int!) {
-        getPersonById(id: $id) {
+export const GET_USER_BY_ID = gql`
+    query getUserById($id: Int!) {
+        getUserById(id: $id) {
             email
             first_name
             last_name
@@ -60,8 +60,11 @@ export const GET_EVENT_BY_ID = gql`
                     first_name
                     last_name
                 }
-                event_id
+                event {
+                    id
+                }
                 attendance
+                comment
             }
         }
     }

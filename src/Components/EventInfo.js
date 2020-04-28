@@ -1,5 +1,4 @@
 import React from "react";
-import Card from "react-bootstrap/Card";
 
 const EventInfo = (props) => {
     const {
@@ -12,22 +11,23 @@ const EventInfo = (props) => {
         date_of_event: date,
         description,
     } = props.event;
-    const returnField = id ? (
-        <Card border="light" style={{ width: "18rem" }}>
-            <Card.Header> Event by {name}</Card.Header>
-            <Card.Body>
-                <Card.Title>{title}</Card.Title>
-                <Card.Text>{description}</Card.Text>
-                <Card.Text>Location: {location}</Card.Text>
-                <Card.Text>
+
+    return (
+        <div className="card text-center">
+            <div style={{ fontWeight: "bold" }} className="card-header ">
+                {" "}
+                Event by {name}
+            </div>
+            <div className="card-body">
+                <div className="card-title">{title}</div>
+                <div className="card-text">{description}</div>
+                <div className="card-text">Location: {location}</div>
+                <div className="card-text">
                     Date: {date} <br /> Time: {time}
-                </Card.Text>
-            </Card.Body>
-        </Card>
-    ) : (
-        <p>Please search for an event.</p>
+                </div>
+            </div>
+        </div>
     );
-    return <>{returnField}</>;
 };
 
 export default EventInfo;
