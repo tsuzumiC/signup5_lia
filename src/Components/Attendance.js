@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { Mutation } from "@apollo/react-components";
-import { useHistory } from "react-router-dom";
+import { useHistory, useRouteMatch } from "react-router-dom";
 
+import { GET_STORED_EVENT } from "../gql/queries";
 import { UPDATE_INVITATION } from "../gql/mutators";
 import { Radio, Field, Submit, Button } from "./Inputs";
+import { logDOM } from "@testing-library/react";
 
 const Attendance = (props) => {
     const {
@@ -13,7 +15,8 @@ const Attendance = (props) => {
         attendance,
         comment,
     } = props.invite;
-    const history = useHistory();
+    const history = useHistory(),
+        match = useRouteMatch();
     const [values, setValues] = useState({
         attendance: attendance,
         comment: comment,
@@ -27,8 +30,22 @@ const Attendance = (props) => {
     };
 
     return (
-        <Mutation mutation={UPDATE_INVITATION}>
-            {(updateInvitation, { data }) => (
+        <Mutation
+            mutation={UPDATE_INVITATION}
+            // update={(cache, { data: { updateInvitation } }) => {
+            //     const { storedEvent } = cache.readQuery({
+            //         query: GET_STORED_EVENT,
+            //     });
+            //     storedEvent.invitations[1].id
+
+            //     ]}
+            //     let tempEvent = {...storedEvent};
+            //     tempEvent.invitations[storedEvent.invitations.findIndex((invite)=> {return invite.id === inviteId})]
+            //     //  {...storedEvent, ...{invitations:{id: inviteId, attendance:values.attendance, comment: values.comment}}};
+            //     cache.writeData({data:{storedEvent}});
+            // }}
+        >
+            {(updateInvitation, { loading, error }) => (
                 <form
                     onSubmit={(event) => {
                         event.preventDefault();
@@ -70,7 +87,7 @@ const Attendance = (props) => {
                     <Field
                         type="text"
                         id="comment"
-                        value={values.comment}
+                        value={values.comment ? values.comment : ""}
                         onChange={handleChange}
                         labelText="Comments"
                     />
@@ -78,7 +95,13 @@ const Attendance = (props) => {
                     <Button
                         id="back"
                         value="Back"
-                        onClick={() => history.push(`/events/${eventId}`)}
+                        onClick={() => {
+                            let url = match.url;
+                            if (url.endsWith("/")) {
+                                url = url.slice(url.length - 1);
+                            }
+                            history.push(url.slice(0, url.lastIndexOf("/")));
+                        }}
                     />
                 </form>
             )}

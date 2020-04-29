@@ -3,10 +3,11 @@ import {
     Switch,
     Redirect,
     Route,
+    useHistory,
     useLocation,
     useRouteMatch,
 } from "react-router-dom";
-import { useLazyQuery } from "@apollo/react-hooks";
+import { useLazyQuery, useApolloClient } from "@apollo/react-hooks";
 
 import { GET_EVENT_BY_ID } from "../gql/queries";
 
@@ -18,11 +19,14 @@ export const Events = () => {
     let response = null,
         eventData = null;
 
-    const location = useLocation(),
+    const history = useHistory(),
+        location = useLocation(),
         address = location.pathname,
         match = useRouteMatch(),
-        eventMatch = new RegExp("^/events/[0-9]+/*$"),
-        inviteMatch = new RegExp("^/events/[0-9]+/[0-9]+/*$");
+        client = useApolloClient(),
+        eventMatch = new RegExp(`^${match.url}/[0-9]+/*$`),
+        inviteMatch = new RegExp(`^${match.url}/[0-9]+/[0-9]+/*$`),
+        idMatch = new RegExp("/[0-9]+/*");
 
     const [values, setValues] = useState({
         eventId: "",
@@ -44,6 +48,7 @@ export const Events = () => {
                 values.storedEvent.id !== values.eventId
             ) {
                 getEvent({ variables: { id: values.eventId } });
+                history.push(match.path);
             }
         };
 
@@ -62,15 +67,19 @@ export const Events = () => {
                 ...values,
                 storedEvent: eventData,
             }));
+            client.writeData({ data: { storedEvent: eventData } });
         }
     } else if (!values.storedEvent && !loading && !error) {
         if (eventMatch.test(address)) {
-            getEvent({ variables: { id: address.match(/[0-9]+/)[0] } });
+            getEvent({
+                variables: { id: address.match(idMatch)[0].replace(/\//g, "") },
+            });
         } else if (inviteMatch.test(address)) {
-            getEvent({ variables: { id: address.match(/[0-9]+/)[0] } });
+            getEvent({
+                variables: { id: address.match(idMatch)[0].replace(/\//g, "") },
+            });
         }
     }
-
     if (values.storedEvent) {
         if (!inviteMatch.test(address)) {
             response = (
@@ -100,7 +109,7 @@ export const Events = () => {
                     ) : null}
                 </Route>
                 <Route path={match.path}>
-                    {loading ? null : <h3>Please enter an Event ID (1-10)</h3>}
+                    {loading ? null : <h3>Please enter an Event ID (1-3)</h3>}
                 </Route>
             </Switch>
         </div>
@@ -109,21 +118,22 @@ export const Events = () => {
 
 const Event = (props) => {
     const match = useRouteMatch(),
-        location = useLocation().pathname,
-        regEx = new RegExp("events/[0-9]+/[0-9]+");
+        location = useLocation(),
+        address = location.pathname,
+        regEx = new RegExp(`^${match.url}/[0-9]+/*$`),
+        idMatch = new RegExp("/[0-9]+", "g");
+
     return (
         <>
             <EventInfo event={props.event} />
             <Switch>
                 <Route path={`${match.path}/:inviteId`}>
-                    {regEx.test(location) ? (
+                    {regEx.test(address) ? (
                         <Attendance
                             invite={props.event.invitations.find((invite) => {
                                 return (
                                     invite.id ===
-                                    location.slice(
-                                        location.lastIndexOf("/") + 1
-                                    )
+                                    address.match(idMatch)[1].replace(/\//g, "")
                                 );
                             })}
                         />

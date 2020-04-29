@@ -1,14 +1,20 @@
 import "./Components/Style/App.css";
 
 import React from "react";
-import { Switch, Route } from "react-router-dom";
+import {
+    Switch,
+    Route,
+    Redirect,
+    useRouteMatch,
+    useLocation,
+} from "react-router-dom";
 
 import { Home, Events } from "./routes";
 
 const App = () => {
     return (
         <Switch>
-            <Route path={`/events`}>
+            <Route path="/events">
                 <Events />
             </Route>
             <Route path="/">

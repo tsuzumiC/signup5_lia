@@ -100,8 +100,11 @@ export const GET_STORED_EVENT = gql`
                     first_name
                     last_name
                 }
-                event_id
+                event {
+                    id
+                }
                 attendance
+                comment
             }
         }
     }
