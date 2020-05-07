@@ -1,6 +1,8 @@
-.input-container {}
+.container {
+    box-sizing: border-box;
+}
 
-.login-field {
+.field {
     position: relative;
     top: -5px;
     width: 100%;
@@ -14,12 +16,12 @@
     font-size: 1rem;
 }
 
-.login-field.active {
+.field.active {
     border: 2px solid #00A6FF;
     box-shadow: inset 0 0 8px #007CBF, 0 0 3px #00A6FF;
 }
 
-.input-lable {
+.label {
     pointer-events: none;
     font-size: 1rem;
     position: relative;
@@ -31,7 +33,7 @@
     z-index: 12;
 }
 
-.input-lable.active {
+.label.active {
     font-size: 1rem;
     font-weight: bold;
     top: 4px;
@@ -40,38 +42,40 @@
     transition: top 0.15s;
 }
 
-.login-button {
+.button {
     width: 110px;
     height: 30px;
     border-radius: 8px;
     box-sizing: border-box;
+    box-shadow: 0 0 4px #0004;
+    font-size: 1rem;
+}
+
+.login {
     border: 1px solid #007CBF;
     background-color: #00A6FF;
-    box-shadow: 0 0 4px #0004;
-    font-size: 1rem;
     color: #fff;
 }
 
-.signup-button {
-    width: 110px;
-    height: 30px;
-    border-radius: 8px;
-    box-sizing: border-box;
+.signup {
     border: 1px solid #007CBF;
     background-color: #002940;
-    box-shadow: 0 0 4px #0004;
-    font-size: 1rem;
     color: #fff;
 }
 
-.cancel-button {
-    width: 110px;
-    height: 30px;
-    border-radius: 8px;
-    box-sizing: border-box;
-    border: 1px solid #0095E6;
-    background-color: #007CBF;
-    box-shadow: 0 0 4px #0004;
-    font-size: 1rem;
-    color: #fff;
+.cancel {
+    border: 1px solid #007CBF;
+    background-color: #476576;
+}
+
+.left {
+    margin-right: 5px;
+}
+
+.right {
+    margin-left: 5px
+}
+
+.middle {
+    margin: 0 5px;
 }
