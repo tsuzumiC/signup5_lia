@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { useHistory, useLocation } from "react-router-dom";
-import GetDecision from "./GetDecision";
 
 const response = {
     ATTENDING: "Is attending.",
@@ -31,8 +30,8 @@ const User = (props) => {
                         <div>
                             {fname} {lname}
                         </div>
-                        <GetDecision decision={response[attendance]} />
-
+                        <i className="fas fa-check"></i>
+                        <div>{response[attendance]}</div>
                         <i
                             onClick={(event) => {
                                 event.stopPropagation();

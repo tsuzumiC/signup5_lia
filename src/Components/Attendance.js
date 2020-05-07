@@ -46,64 +46,104 @@ const Attendance = (props) => {
             // }}
         >
             {(updateInvitation, { loading, error }) => (
-                <form
-                    onSubmit={(event) => {
-                        event.preventDefault();
-                        updateInvitation({
-                            variables: {
-                                invitationUpdateInput: {
-                                    id: inviteId,
-                                    comment: values.comment,
-                                    attendance: values.attendance,
-                                },
-                            },
-                        });
-                    }}
-                >
-                    <Radio
-                        id="attending"
-                        name="attendance"
-                        value="ATTENDING"
-                        labelText="Attending"
-                        onChange={handleChange}
-                        compare={values.attendance}
-                    />
-                    <Radio
-                        id="not_attending"
-                        name="attendance"
-                        value="NOT_ATTENDING"
-                        labelText="Can't Attend"
-                        onChange={handleChange}
-                        compare={values.attendance}
-                    />
-                    <Radio
-                        id="maybe"
-                        name="attendance"
-                        value="MAYBE"
-                        labelText="Maybe"
-                        onChange={handleChange}
-                        compare={values.attendance}
-                    />
-                    <Field
-                        type="text"
-                        id="comment"
-                        value={values.comment ? values.comment : ""}
-                        onChange={handleChange}
-                        labelText="Comments"
-                    />
-                    <Submit id="submit" value="Save" />
-                    <Button
-                        id="back"
-                        value="Back"
-                        onClick={() => {
-                            let url = match.url;
-                            if (url.endsWith("/")) {
-                                url = url.slice(url.length - 1);
-                            }
-                            history.push(url.slice(0, url.lastIndexOf("/")));
-                        }}
-                    />
-                </form>
+                <div className="container mt-5">
+                    <div className="card bg-warning ">
+                        <div
+                            style={{ color: "black" }}
+                            className="card-header "
+                        >
+                            <div className="d-flex  justify-content-center">
+                                <form
+                                    onSubmit={(event) => {
+                                        event.preventDefault();
+                                        updateInvitation({
+                                            variables: {
+                                                invitationUpdateInput: {
+                                                    id: inviteId,
+                                                    comment: values.comment,
+                                                    attendance:
+                                                        values.attendance,
+                                                },
+                                            },
+                                        });
+                                    }}
+                                >
+                                    <div className="d-flex flex-column text-center">
+                                        {`${first_name} ${last_name}`}
+                                        {/* här kommer namn du får ta från redux */}
+                                        <div className="card-title mt-5">
+                                            Are you attending this event ?
+                                        </div>
+                                        <div className="d-flex  justify-content-around">
+                                            <div className="d-flex  flex-column">
+                                                <Radio
+                                                    id="attending"
+                                                    name="attendance"
+                                                    value="ATTENDING"
+                                                    labelText="Attending"
+                                                    onChange={handleChange}
+                                                    compare={values.attendance}
+                                                />
+                                            </div>
+                                            <div className="d-flex  flex-column">
+                                                <Radio
+                                                    id="not_attending"
+                                                    name="attendance"
+                                                    value="NOT_ATTENDING"
+                                                    labelText="Can't Attend"
+                                                    onChange={handleChange}
+                                                    compare={values.attendance}
+                                                />
+                                            </div>
+                                            <div className="d-flex  flex-column">
+                                                <Radio
+                                                    id="maybe"
+                                                    name="attendance"
+                                                    value="MAYBE"
+                                                    labelText="Maybe"
+                                                    onChange={handleChange}
+                                                    compare={values.attendance}
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="card-body">
+                                        <Field
+                                            type="text"
+                                            id="comment"
+                                            value={
+                                                values.comment
+                                                    ? values.comment
+                                                    : ""
+                                            }
+                                            onChange={handleChange}
+                                            labelText="Comments"
+                                        />
+                                        <Submit id="submit" value="Save" />
+                                        <Button
+                                            id="back"
+                                            value="Back"
+                                            onClick={() => {
+                                                let url = match.url;
+                                                if (url.endsWith("/")) {
+                                                    url = url.slice(
+                                                        url.length - 1
+                                                    );
+                                                }
+                                                history.push(
+                                                    url.slice(
+                                                        0,
+                                                        url.lastIndexOf("/")
+                                                    )
+                                                );
+                                            }}
+                                        />
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             )}
         </Mutation>
     );
