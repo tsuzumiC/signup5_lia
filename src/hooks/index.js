@@ -10,6 +10,7 @@ export const useForm = (callback, data) => {
         }));
     };
     const handleSubmit = (event, onSubmit) => {
+
         event.preventDefault();
         if (onSubmit) {
             setValues((values) => ({
@@ -18,11 +19,15 @@ export const useForm = (callback, data) => {
             }));
         }
         callback(values);
+
     };
+   
+    }
 
     return {
         values,
         handleChange,
         handleSubmit,
+       
     };
 };

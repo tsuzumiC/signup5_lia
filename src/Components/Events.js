@@ -14,6 +14,7 @@ import { GET_EVENT_BY_ID } from "../gql/queries";
 import EventInfo from "./EventInfo";
 import Invited from "./Invited";
 import Attendance from "./Attendance";
+import EventCreator from "./EventCreator";
 
 export const Events = () => {
     let response = null,
@@ -122,29 +123,47 @@ const Event = (props) => {
         address = location.pathname,
         regEx = new RegExp(`^${match.url}/[0-9]+/*$`),
         idMatch = new RegExp("/[0-9]+", "g");
+    const [showCreator, setShowCreator] = useState(false);
 
     return (
         <>
-            <EventInfo event={props.event} />
-            <Switch>
-                <Route path={`${match.path}/:inviteId`}>
-                    {regEx.test(address) ? (
-                        <Attendance
-                            invite={props.event.invitations.find((invite) => {
-                                return (
-                                    invite.id ===
-                                    address.match(idMatch)[1].replace(/\//g, "")
-                                );
-                            })}
-                        />
-                    ) : (
-                        <div>Loading</div>
-                    )}
-                </Route>
-                <Route path={match.path}>
-                    <Invited invited={props.event.invitations} />
-                </Route>
-            </Switch>
+            {!showCreator ? (
+                <>
+                    <EventInfo event={props.event} />
+                    <Switch>
+                        <Route path={`${match.path}/:inviteId`}>
+                            {regEx.test(address) ? (
+                                <Attendance
+                                    invite={props.event.invitations.find(
+                                        (invite) => {
+                                            return (
+                                                invite.id ===
+                                                address
+                                                    .match(idMatch)[1]
+                                                    .replace(/\//g, "")
+                                            );
+                                        }
+                                    )}
+                                />
+                            ) : (
+                                <div>Loading</div>
+                            )}
+                        </Route>
+                        <Route path={match.path}>
+                            <Invited invited={props.event.invitations} />
+                            <button
+                                onClick={() => setShowCreator(!showCreator)}
+                                type="button"
+                                class="btn btn-danger mt-2"
+                            >
+                                <i className="fas fa-plus"></i>Create Event
+                            </button>
+                        </Route>
+                    </Switch>
+                </>
+            ) : (
+                <EventCreator  handlePage={setShowCreator}  pageStat={showCreator} />
+            )}
         </>
     );
 };
