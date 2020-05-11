@@ -2,7 +2,7 @@ import React from "react";
 
 const EventInfo = (props) => {
     const {
-        id,
+        /* id, */
         host: { first_name: fname, last_name: lname },
         name = `${fname} ${lname}`,
         title,

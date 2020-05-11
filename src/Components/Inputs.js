@@ -1,4 +1,4 @@
-import "./Style/Input.css";
+import "./style/Input.css";
 
 import React from "react";
 

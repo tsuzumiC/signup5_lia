@@ -1,119 +1,110 @@
-import React, { Component } from "react";
+import React, { useState } from "react";
+import { Mutation } from "@apollo/react-components";
+import { useHistory } from "react-router-dom";
 
-// import Consumer from '../context'
-var uniqid = require("uniqid");
+import { CREATE_EVENT } from "../gql/mutators";
 
-export default class EventCreator extends Component {
-    state = {
-        showContent: false,
-        addGuestForm: false,
+const EventCreator = () => {
+    const [values, setValues] = useState({
+            addGuestForm: false,
 
-        name: "",
-        loc: "",
-        date: "",
-        start: "",
-        end: "",
-        des: "",
-        gName: "",
-        gSurname: "",
-        gEmail: "",
-        guests: [],
+            title: "",
+            location: "",
+            date: "",
+            startTime: "",
+            endTime: "",
+            description: "",
+            guests: [],
+            gName: "",
+            gSurname: "",
+            gEmail: "",
+        }),
+        {
+            addGuestForm,
+            title,
+            location,
+            date,
+            startTime,
+            endTime,
+            description,
+            guests,
+            gName,
+            gSurname,
+            gEmail,
+        } = values,
+        history = useHistory();
+
+    const handleChange = (event) => {
+        event.persist();
+        setValues((values) => ({
+            ...values,
+            [event.target.name]: event.target.value,
+        }));
     };
 
-    changeInput = (e) => {
-        const value = e.target.value;
-        const name = e.target.name;
-
-        this.setState({
-            [name]: value,
-        });
-    };
-
-    openContent = () => {
-        this.setState({
-            showContent: !this.state.showContent,
-        });
-    };
-
-    returnMainPage = () => {
-        // dispach parametresi gonnderiliyordu
-        const { handlePage, pageStat } = this.props;
-        handlePage(!pageStat);
-        //  dispatch({type : "CHANGE_VISIBILITY_EC"})
-    };
-
-    createEvent = () => { // state ve event butun verileri backend e cekilebilir.
-        // dispach parametresi gonnderiliyordu
-        const { name, loc, date, start, end, des, guests } = this.state;
-
+    const handleCreateEvent = (createEvent, event) => {
         if (
-            name !== "" &&
-            loc !== "" &&
+            title !== "" &&
+            location !== "" &&
             date !== "" &&
-            start !== "" &&
-            end !== "" &&
-            des !== "" &&
+            startTime !== "" &&
+            endTime !== "" &&
+            description !== "" &&
             guests.length > 0
         ) {
-            const eventInfo = {
-                name,
-                des,
-                date,
-                loc,
-                startTime: start,
-                endTime: end,
-            };
-            this.returnMainPage();
-            // dispatch({ type: "ADD_EVENT", payload: eventInfo });
-            // dispatch({ type: "CHANGE_VISIBILITY_EC" });
-            // dispatch({ type: "ADD_GUEST", payload: guests });
+            createEvent({
+                variables: {
+                    event: {
+                        host: {
+                            id: 1,
+                        },
+                        title: title,
+                        description: description,
+                        date_of_event: date,
+                        start_time_of_event: startTime,
+                        end_time_of_event: endTime,
+                        location: location,
+                        invitations: guests.map((guest) => {
+                            return { guest: guest };
+                        }),
+                    },
+                },
+            });
         } else {
             alert("missing field pls fill everywhere");
         }
     };
 
-    showAddGuestForm = () => {
-        this.setState({
-            addGuestForm: !this.state.addGuestForm,
-        });
-    };
-
-    addGuest = () => {
-        const { gEmail, gName, gSurname, guests } = this.state;
-
+    const addGuest = () => {
         if (gName !== "" && gSurname !== "" && gEmail !== "") {
-            guests.push({
-                id: uniqid(),
-                name: gName,
-                surname: gSurname,
-                email: gEmail,
-            });
+            setValues((values) => ({
+                ...values,
+                addGuestForm: !addGuestForm,
+                gEmail: "",
+                gName: "",
+                gSurname: "",
+                guests: guests.concat({
+                    first_name: gName,
+                    last_name: gSurname,
+                    email: gEmail,
+                }),
+            }));
         }
-        this.setState({
-            gEmail: "",
-            gName: "",
-            gSurname: "",
-        });
-        this.showAddGuestForm();
 
         console.log(guests);
     };
 
-    showAddedGuests = () => {
-        const { guests } = this.state;
-        const title = "";
-
+    const showAddedGuests = () => {
         return (
             <>
-                <div style={{ color: "grey" }}>
-                    Name&emsp;&emsp;&emsp;&emsp;Surname&emsp;&emsp;&emsp;&emsp;Email{" "}
-                    <br />
-                </div>
                 {guests.length > 0 ? (
                     <div>
+                        <div style={{ color: "grey" }}>
+                            Name&emsp;&emsp;&emsp;&emsp;Surname&emsp;&emsp;&emsp;&emsp;Email{" "}
+                            <br />
+                        </div>
                         <ul className="list-group">
                             {guests.map((guest) => {
-                                // tüm userları ekrana verdim
                                 return (
                                     <li
                                         key={guest.id}
@@ -126,17 +117,26 @@ export default class EventCreator extends Component {
                                                     fontWeight: "bold",
                                                 }}
                                             >
-                                                {guest.name}
+                                                {guest.first_name}
                                                 &emsp;&emsp;&emsp;&emsp;
-                                                {guest.surname}
+                                                {guest.last_name}
                                                 &emsp;&emsp;&emsp;&emsp;
                                                 {guest.email}{" "}
                                                 &emsp;&emsp;&emsp;&emsp;
                                                 <i
-                                                    onClick={this.deleteGuest.bind(
-                                                        this,
-                                                        guest.id
-                                                    )}
+                                                    onClick={() => {
+                                                        setValues((values) => ({
+                                                            ...values,
+                                                            guests: guests.filter(
+                                                                (item) => {
+                                                                    return (
+                                                                        item.id !==
+                                                                        guest.id
+                                                                    );
+                                                                }
+                                                            ),
+                                                        }));
+                                                    }}
                                                     style={{
                                                         cursor: "pointer",
                                                     }}
@@ -154,70 +154,60 @@ export default class EventCreator extends Component {
         );
     };
 
-    deleteGuest = (id) => {
-        this.setState({
-            guests: this.state.guests.filter((guest) => guest.id !== id),
-        });
-    };
-    render() {
-        const { showContent, addGuestForm } = this.state;
-        const { name, loc, date, start, end, des } = this.state;
-        const { gEmail, gName, gSurname } = this.state;
-
-        return (
-            <div style={{ backgroundColor: "#ECD275" }} className="card">
-                <div onClick={this.openContent} className="card-header">
-                    <div
-                        style={{
-                            fontSize: 24,
-                            borderColor: "#000",
-                            borderStyle: "solid",
-                            borderWidth: "1px",
-                            borderRadius: "4%",
-                            backgroundColor: "#F4EDAB",
-                        }}
-                        className="d-inline ml-3"
-                    >
-                        Create Event
-                    </div>
+    return (
+        <div style={{ backgroundColor: "#ECD275" }} className="card">
+            <div className="card-header">
+                <div
+                    style={{
+                        fontSize: 24,
+                        padding: "0 5px",
+                    }}
+                    className="d-inline ml-3"
+                >
+                    Create New Event
                 </div>
-                {showContent ? (
+            </div>
+            <Mutation
+                mutation={CREATE_EVENT}
+                onCompleted={() => {
+                    history.push("/");
+                }}
+            >
+                {(createEvent, { loading, error }) => (
                     <div className="card-body">
                         <div className="d-flex flex-column">
                             <div>
                                 <label
                                     className="mr-2"
                                     style={{ fontWeight: "bold" }}
-                                    htmlFor="name"
+                                    htmlFor="title"
                                 >
                                     Event Name :
                                 </label>
                                 <input
-                                    value={name}
-                                    onChange={this.changeInput}
-                                    name="name"
-                                    id="name"
+                                    value={title}
+                                    onChange={handleChange}
+                                    name="title"
+                                    id="title"
                                     type="text"
                                 />
                             </div>
-
                             <div>
                                 <label
                                     className="mr-4"
                                     style={{ fontWeight: "bold" }}
-                                    htmlFor="loc"
+                                    htmlFor="location"
                                 >
                                     Location :
                                 </label>
                                 <input
-                                    value={loc}
-                                    onChange={this.changeInput}
-                                    name="loc"
-                                    id="loc"
+                                    value={location}
+                                    onChange={handleChange}
+                                    name="location"
+                                    id="location"
                                     type="text"
                                 />
                             </div>
-
                             <div>
                                 <label
                                     className="mr-5"
@@ -228,39 +218,37 @@ export default class EventCreator extends Component {
                                 </label>
                                 <input
                                     value={date}
-                                    onChange={this.changeInput}
+                                    onChange={handleChange}
                                     name="date"
                                     id="date"
                                     type="date"
                                 />
-
                                 <label
                                     className="ml-1"
                                     style={{ fontWeight: "bold" }}
-                                    htmlFor="start"
+                                    htmlFor="startTime"
                                 >
                                     Start Time:
                                 </label>
                                 <input
-                                    value={start}
-                                    onChange={this.changeInput}
-                                    name="start"
-                                    id="start"
+                                    value={startTime}
+                                    onChange={handleChange}
+                                    name="startTime"
+                                    id="startTime"
                                     type="time"
                                 />
-
                                 <label
                                     className="ml-1"
                                     style={{ fontWeight: "bold" }}
-                                    htmlFor="end"
+                                    htmlFor="endTime"
                                 >
                                     End Time:
                                 </label>
                                 <input
-                                    value={end}
-                                    onChange={this.changeInput}
-                                    name="end"
-                                    id="end"
+                                    value={endTime}
+                                    onChange={handleChange}
+                                    name="endTime"
+                                    id="endTime"
                                     type="time"
                                 />
                             </div>
@@ -268,20 +256,23 @@ export default class EventCreator extends Component {
                         <div>
                             <p className="ml-3">Description : </p>
                             <textarea
-                                value={des}
-                                onChange={this.changeInput}
-                                name="des"
-                                id="des"
+                                value={description}
+                                onChange={handleChange}
+                                name="description"
+                                id="description"
                                 cols="50"
                                 rows="10"
                             ></textarea>
                         </div>
-
                         <div>
-                            {this.showAddedGuests()}
-
+                            {showAddedGuests()}
                             <button
-                                onClick={this.showAddGuestForm}
+                                onClick={() => {
+                                    setValues((values) => ({
+                                        ...values,
+                                        addGuestForm: !addGuestForm,
+                                    }));
+                                }}
                                 type="button"
                                 className="btn btn-warning mt-2 mb-2"
                             >
@@ -294,7 +285,13 @@ export default class EventCreator extends Component {
                             </button>
                             <div>
                                 {addGuestForm ? (
-                                    <div className="d-inline-flex flex-column border border-info mb-5">
+                                    <form
+                                        onSubmit={(event) => {
+                                            event.preventDefault();
+                                            addGuest();
+                                        }}
+                                        className="d-inline-flex flex-column border border-info mb-5"
+                                    >
                                         <div>
                                             <label
                                                 className="mr-2"
@@ -306,13 +303,12 @@ export default class EventCreator extends Component {
                                             </label>
                                             <input
                                                 value={gName}
-                                                onChange={this.changeInput}
+                                                onChange={handleChange}
                                                 name="gName"
                                                 id="gName"
                                                 type="text"
                                             />
                                         </div>
-
                                         <div>
                                             <label
                                                 className="mr-4"
@@ -323,13 +319,12 @@ export default class EventCreator extends Component {
                                             </label>
                                             <input
                                                 value={gSurname}
-                                                onChange={this.changeInput}
+                                                onChange={handleChange}
                                                 name="gSurname"
                                                 id="gSurname"
                                                 type="text"
                                             />
                                         </div>
-
                                         <div>
                                             <label
                                                 className="mr-4"
@@ -340,45 +335,51 @@ export default class EventCreator extends Component {
                                             </label>
                                             <input
                                                 value={gEmail}
-                                                onChange={this.changeInput}
+                                                onChange={handleChange}
                                                 name="gEmail"
                                                 id="gEmail"
-                                                type="text"
+                                                type="email"
                                             />
                                         </div>
-
                                         <div>
                                             <button
-                                                onClick={this.addGuest}
-                                                type="button"
+                                                type="submit"
                                                 className="btn btn-success mb-3"
                                             >
                                                 Add Invitation
                                             </button>
                                         </div>
-                                    </div>
+                                    </form>
                                 ) : null}
                             </div>
                         </div>
                         <div className="d-inline-flex">
                             <button
-                                onClick={this.returnMainPage}
+                                onClick={() => {
+                                    history.push("/");
+                                }}
                                 type="button"
                                 className="btn btn-light mr-2"
                             >
                                 Cancel
                             </button>
                             <button
-                                onClick={this.createEvent} // burdan cekebilir verileri
+                                onClick={(event) => {
+                                    handleCreateEvent(createEvent, event);
+                                }}
                                 type="button"
                                 className="btn btn-primary"
+                                disabled={loading}
                             >
                                 Create
                             </button>
+                            {error}
                         </div>
                     </div>
-                ) : null}
-            </div>
-        );
-    }
-}
+                )}
+            </Mutation>
+        </div>
+    );
+};
+
+export default EventCreator;

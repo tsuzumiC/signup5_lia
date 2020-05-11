@@ -37,9 +37,17 @@ const GetDecision = (props) => {
                 </div>
             );
         },
+        NO_RESPONSE: () => {
+            return (
+                <div className="d-flex justify-content-between">
+                    <i style={{ marginTop: "5px" }} className="fas fa-sync"></i>
+                    <p style={{ marginLeft: "60px" }}>Not respondend</p>
+                </div>
+            );
+        },
     };
 
-    if (decision === "Is attending.") {
+    /* if (decision === "Is attending.") {
         return (
             <div className="d-flex justify-content-between">
                 <i style={{ marginTop: "5px" }} className="fas fa-check"></i>{" "}
@@ -75,6 +83,8 @@ const GetDecision = (props) => {
                 <p style={{ marginLeft: "60px" }}>Not respondend</p>
             </div>
         );
-    }
+    } */
+
+    return response[decision]();
 };
 export default GetDecision;

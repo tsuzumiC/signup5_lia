@@ -21,24 +21,6 @@ export const GET_USER_BY_ID = gql`
     }
 `;
 
-export const GET_PERSON_BY_EMAIL = gql`
-    query getPersonByEmail($email: String!) {
-        getPersonByEmail(email: $email) {
-            id
-            first_name
-            last_name
-        }
-    }
-`;
-
-export const TRY_LOGIN = gql`
-    query getPersonByEmail($email: String!) {
-        getPersonByEmail(email: $email) {
-            id
-        }
-    }
-`;
-
 export const GET_EVENT_BY_ID = gql`
     query getEventById($id: Int!) {
         getEventById(id: $id) {
@@ -51,7 +33,8 @@ export const GET_EVENT_BY_ID = gql`
             }
             description
             date_of_event
-            time_of_event
+            start_time_of_event
+            end_time_of_event
             location
             invitations {
                 id
@@ -79,9 +62,9 @@ export const LOGGED_IN_USER = gql`
     }
 `;
 
-export const GET_STORED_EVENT = gql`
-    query getStoredEvent {
-        storedEvent @client {
+export const GET_CACHED_EVENTS = gql`
+    query getCachedEvents {
+        events @client {
             id
             title
             host {
