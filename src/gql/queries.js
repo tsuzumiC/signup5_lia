@@ -79,9 +79,9 @@ export const LOGGED_IN_USER = gql`
     }
 `;
 
-export const GET_STORED_EVENT = gql`
-    query getStoredEvent {
-        storedEvent @client {
+export const GET_CACHED_EVENTS = gql`
+    query getCachedEvents {
+        events @client {
             id
             title
             host {

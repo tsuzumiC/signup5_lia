@@ -1,38 +1,26 @@
 import React, { useState } from "react";
 import {
-    Switch,
-    Redirect,
     Route,
-    useHistory,
-    useLocation,
+    Switch,
     useRouteMatch,
+    useLocation,
+    useHistory,
 } from "react-router-dom";
-import { useLazyQuery, useApolloClient } from "@apollo/react-hooks";
-
-import { GET_EVENT_BY_ID } from "../gql/queries";
+import { useLazyQuery, useQuery, useApolloClient } from "@apollo/react-hooks";
+import { GET_EVENT_BY_ID, GET_CACHED_EVENTS } from "../gql/queries";
+import _ from "lodash";
 
 import EventInfo from "./EventInfo";
 import Invited from "./Invited";
 import Attendance from "./Attendance";
 
-export const Events = () => {
-    let response = null,
-        eventData = null;
-
-    const history = useHistory(),
-        location = useLocation(),
-        address = location.pathname,
-        match = useRouteMatch(),
-        client = useApolloClient(),
-        eventMatch = new RegExp(`^${match.url}/[0-9]+/*$`),
-        inviteMatch = new RegExp(`^${match.url}/[0-9]+/[0-9]+/*$`),
-        idMatch = new RegExp("/[0-9]+/*");
+const Events = () => {
+    const match = useRouteMatch(),
+        history = useHistory();
 
     const [values, setValues] = useState({
-        eventId: "",
-        storedEvent: null,
+        inputValue: "",
     });
-    const [getEvent, { loading, error, data }] = useLazyQuery(GET_EVENT_BY_ID);
 
     const handleChange = (event) => {
             event.persist();
@@ -43,108 +31,114 @@ export const Events = () => {
         },
         handleSubmit = (event) => {
             event.preventDefault();
-            if (
-                !values.storedEvent ||
-                values.storedEvent.id !== values.eventId
-            ) {
-                getEvent({ variables: { id: values.eventId } });
-                history.push(match.path);
-            }
+            history.push(`${match.url}/${values.inputValue}`);
         };
-
-    if (loading) {
-        response = <p>Loading...</p>;
-    }
-
-    if (error) {
-        response = <p>No event with this ID.</p>;
-    }
-
-    if (data) {
-        eventData = data.getEventById;
-        if (!values.storedEvent || eventData.id !== values.storedEvent.id) {
-            setValues((values) => ({
-                ...values,
-                storedEvent: eventData,
-            }));
-            client.writeData({ data: { storedEvent: eventData } });
-        }
-    } else if (!values.storedEvent && !loading && !error) {
-        if (eventMatch.test(address)) {
-            getEvent({
-                variables: { id: address.match(idMatch)[0].replace(/\//g, "") },
-            });
-        } else if (inviteMatch.test(address)) {
-            getEvent({
-                variables: { id: address.match(idMatch)[0].replace(/\//g, "") },
-            });
-        }
-    }
-    if (values.storedEvent) {
-        if (!inviteMatch.test(address)) {
-            response = (
-                <Redirect to={`${match.path}/${values.storedEvent.id}`} />
-            );
-        }
-    }
-
     return (
         <div>
             <form onSubmit={handleSubmit}>
                 <input
                     type="number"
-                    value={values.eventId}
+                    value={values.inputValue}
                     onChange={handleChange}
-                    name="eventId"
-                    min="1"
-                    max="10"
+                    name="inputValue"
                 />
                 <input type="submit" value="Search" />
             </form>
-            <div>{response}</div>
             <Switch>
                 <Route path={`${match.path}/:eventId`}>
-                    {values.storedEvent ? (
-                        <Event event={values.storedEvent} />
-                    ) : null}
+                    <Event />
                 </Route>
-                <Route path={match.path}>
-                    {loading ? null : <h3>Please enter an Event ID (1-3)</h3>}
-                </Route>
+                <Route path={match.path}>Search for an Event</Route>
             </Switch>
         </div>
     );
 };
 
-const Event = (props) => {
+const Event = () => {
     const match = useRouteMatch(),
         location = useLocation(),
         address = location.pathname,
-        regEx = new RegExp(`^${match.url}/[0-9]+/*$`),
-        idMatch = new RegExp("/[0-9]+", "g");
+        client = useApolloClient(),
+        isInviteMatch = new RegExp(`${match.url}/[0-9]+/*`),
+        isEventMatch = new RegExp(`${match.url}`),
+        idMatch = new RegExp("/[0-9]+/*", "g");
+    let event = null,
+        invite = null;
+
+    const eventID = address.match(idMatch)[0].replace(/\//g, ""),
+        inviteID = address.replace(isEventMatch, "").replace(/\//g, "");
+
+    const {
+        data: { events: cachedEvents },
+    } = useQuery(GET_CACHED_EVENTS);
+
+    const [getEvent, { data, loading, error }] = useLazyQuery(GET_EVENT_BY_ID);
+
+    if (loading) {
+        return <p>{`Loading event ${eventID}`}</p>;
+    }
+    if (error) {
+        return (
+            <pre>{`Error loading event ${eventID} with response:
+    ${error}`}</pre>
+        );
+    }
+    if (data) {
+        if (data.getEventById.id === eventID) {
+            event = data.getEventById;
+            if (
+                !cachedEvents.find((cachedEvent) => {
+                    return _.isEqual(cachedEvent, event);
+                })
+            ) {
+                client.writeData({
+                    data: {
+                        events: cachedEvents.concat(event),
+                    },
+                });
+            }
+        } else {
+            getEvent({ variables: { id: eventID } });
+        }
+    } else if (cachedEvents.length > 0 && !loading) {
+        event = cachedEvents.find((event) => {
+            return event.id === eventID;
+        });
+        if (event === undefined) {
+            event = null;
+            getEvent({ variables: { id: eventID } });
+        }
+    } else if (!loading) {
+        getEvent({ variables: { id: eventID } });
+    }
+
+    if (event === null) {
+        return <p>{`Loading event ${eventID}`}</p>;
+    }
+
+    if (isInviteMatch.test(address)) {
+        invite = event.invitations.find((invite) => {
+            return invite.id === inviteID;
+        });
+    }
 
     return (
         <>
-            <EventInfo event={props.event} />
+            <EventInfo event={event} />
             <Switch>
                 <Route path={`${match.path}/:inviteId`}>
-                    {regEx.test(address) ? (
-                        <Attendance
-                            invite={props.event.invitations.find((invite) => {
-                                return (
-                                    invite.id ===
-                                    address.match(idMatch)[1].replace(/\//g, "")
-                                );
-                            })}
-                        />
+                    {!!invite ? (
+                        <Attendance invite={invite} />
                     ) : (
-                        <div>Loading</div>
+                        <p>Invalid invite ID</p>
                     )}
                 </Route>
                 <Route path={match.path}>
-                    <Invited invited={props.event.invitations} />
+                    <Invited invited={event.invitations} />
                 </Route>
             </Switch>
         </>
     );
 };
+
+export default Events;

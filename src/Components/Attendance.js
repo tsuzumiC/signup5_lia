@@ -2,12 +2,13 @@ import React, { useState } from "react";
 import { Mutation } from "@apollo/react-components";
 import { useHistory, useRouteMatch } from "react-router-dom";
 
-import { GET_STORED_EVENT } from "../gql/queries";
+import { GET_CACHED_EVENTS } from "../gql/queries";
 import { UPDATE_INVITATION } from "../gql/mutators";
 import { Radio, Field, Submit, Button } from "./Inputs";
-import { logDOM } from "@testing-library/react";
 
 const Attendance = (props) => {
+    const history = useHistory(),
+        match = useRouteMatch();
     const {
         id: inviteId,
         guest: { id: guestId, first_name, last_name },
@@ -15,8 +16,6 @@ const Attendance = (props) => {
         attendance,
         comment,
     } = props.invite;
-    const history = useHistory(),
-        match = useRouteMatch();
     const [values, setValues] = useState({
         attendance: attendance,
         comment: comment,
@@ -32,18 +31,26 @@ const Attendance = (props) => {
     return (
         <Mutation
             mutation={UPDATE_INVITATION}
-            // update={(cache, { data: { updateInvitation } }) => {
-            //     const { storedEvent } = cache.readQuery({
-            //         query: GET_STORED_EVENT,
-            //     });
-            //     storedEvent.invitations[1].id
-
-            //     ]}
-            //     let tempEvent = {...storedEvent};
-            //     tempEvent.invitations[storedEvent.invitations.findIndex((invite)=> {return invite.id === inviteId})]
-            //     //  {...storedEvent, ...{invitations:{id: inviteId, attendance:values.attendance, comment: values.comment}}};
-            //     cache.writeData({data:{storedEvent}});
-            // }}
+            update={(cache, { data: { updateInvitation } }) => {
+                console.log(updateInvitation);
+                const { events: cachedEvents } = cache.readQuery({
+                    query: GET_CACHED_EVENTS,
+                });
+                let thisEvent = cachedEvents.find((event) => {
+                        return event.id === eventId;
+                    }),
+                    thisInvite = thisEvent.invitations.find((invite) => {
+                        return invite.id === inviteId;
+                    });
+                thisInvite.attendance = values.attendance;
+                thisInvite.comment = values.comment;
+                thisEvent.invitations = thisEvent.invitations.concat(
+                    thisInvite
+                );
+                cache.writeData({
+                    data: { events: cachedEvents.concat(thisEvent) },
+                });
+            }}
         >
             {(updateInvitation, { loading, error }) => (
                 <div className="container mt-5">
@@ -70,7 +77,6 @@ const Attendance = (props) => {
                                 >
                                     <div className="d-flex flex-column text-center">
                                         {`${first_name} ${last_name}`}
-                                        {/* här kommer namn du får ta från redux */}
                                         <div className="card-title mt-5">
                                             Are you attending this event ?
                                         </div>
@@ -124,17 +130,8 @@ const Attendance = (props) => {
                                             id="back"
                                             value="Back"
                                             onClick={() => {
-                                                let url = match.url;
-                                                if (url.endsWith("/")) {
-                                                    url = url.slice(
-                                                        url.length - 1
-                                                    );
-                                                }
                                                 history.push(
-                                                    url.slice(
-                                                        0,
-                                                        url.lastIndexOf("/")
-                                                    )
+                                                    `/events/${eventId}`
                                                 );
                                             }}
                                         />
