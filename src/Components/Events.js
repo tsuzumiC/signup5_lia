@@ -16,26 +16,32 @@ import Attendance from "./Attendance";
 
 const Events = () => {
     const match = useRouteMatch(),
-        history = useHistory();
-
+        location = useLocation(),
+        address = location.pathname,
+        history = useHistory(),
+        isEventMatch = new RegExp(`${match.url}/[0-9]+/*`),
+        idMatch = new RegExp("/[0-9]+/*", "g");
     const [values, setValues] = useState({
-        inputValue: "",
+        inputValue: isEventMatch.test(address)
+            ? address.match(idMatch)[0].replace(/\//g, "")
+            : "",
     });
 
     const handleChange = (event) => {
-            event.persist();
-            setValues((values) => ({
-                ...values,
-                [event.target.name]: event.target.value,
-            }));
-        },
-        handleSubmit = (event) => {
-            event.preventDefault();
-            history.push(`/events/${values.inputValue}`);
-        };
+        event.persist();
+        setValues((values) => ({
+            ...values,
+            [event.target.name]: event.target.value,
+        }));
+    };
     return (
         <div>
-            <form onSubmit={handleSubmit}>
+            <form
+                onSubmit={(event) => {
+                    event.preventDefault();
+                    history.push(`/events/${values.inputValue}`);
+                }}
+            >
                 <input
                     type="number"
                     value={values.inputValue}
@@ -59,37 +65,29 @@ const Event = () => {
         location = useLocation(),
         address = location.pathname,
         client = useApolloClient(),
-        [lastErrorID, setlastErrorID] = useState(null),
         isInviteMatch = new RegExp(`${match.url}/*[0-9]+/*`),
         isEventMatch = new RegExp(`${match.url}`),
-        idMatch = new RegExp("/[0-9]+/*", "g");
-    let event = null,
-        invite = null;
-
-    const eventID = address.match(idMatch)[0].replace(/\//g, ""),
+        idMatch = new RegExp("/[0-9]+/*", "g"),
+        eventID = address.match(idMatch)[0].replace(/\//g, ""),
         inviteID = address.replace(isEventMatch, "").replace(/\//g, "");
-
+    const [lastErrorID, setLastErrorID] = useState(null);
     const {
         data: { events: cachedEvents },
     } = useQuery(GET_CACHED_EVENTS);
-
     const [getEvent, { data, loading, error }] = useLazyQuery(GET_EVENT_BY_ID);
-    console.log(!!data, !!loading, !!error, lastErrorID);
+
+    let event = null,
+        invite = null;
 
     if (loading) {
         if (lastErrorID !== null) {
-            setlastErrorID(null);
+            setLastErrorID(null);
         }
         return <p>{`Loading event ${eventID}`}</p>;
-    } else if (error && (eventID === lastErrorID || lastErrorID === null)) {
-        if (lastErrorID === null) {
-            setlastErrorID(eventID);
-        }
-        return (
-            <pre>{`Error loading event ${eventID} with response:
-    ${error}`}</pre>
-        );
     } else if (data && data.getEventById.id === eventID) {
+        if (lastErrorID !== null) {
+            setLastErrorID(null);
+        }
         event = data.getEventById;
         if (
             !cachedEvents.find((cachedEvent) => {
@@ -105,21 +103,29 @@ const Event = () => {
                 },
             });
         }
-        if (lastErrorID !== null) {
-            setlastErrorID(null);
-        }
     } else if (
         !!cachedEvents.find((event) => {
             return event.id === eventID;
         })
     ) {
+        if (lastErrorID !== null) {
+            setLastErrorID(null);
+        }
         event = cachedEvents.find((event) => {
             return event.id === eventID;
         });
-        if (lastErrorID !== null) {
-            setlastErrorID(null);
+    } else if (error && (eventID === lastErrorID || lastErrorID === null)) {
+        if (lastErrorID === null) {
+            setLastErrorID(eventID);
         }
+        return (
+            <pre>{`Error loading event ${eventID} with response:
+    ${error}`}</pre>
+        );
     } else {
+        if (lastErrorID !== null) {
+            setLastErrorID(null);
+        }
         getEvent({ variables: { id: eventID } });
     }
 
@@ -128,9 +134,11 @@ const Event = () => {
             return invite.id === inviteID;
         });
     }
+
     if (event === null) {
         return <p>{`Loading event ${eventID}`}</p>;
     }
+
     return (
         <>
             <EventInfo event={event} />

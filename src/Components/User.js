@@ -20,7 +20,7 @@ const User = (props) => {
                 <div
                     className="card-header"
                     onClick={() => {
-                        return comment
+                        comment
                             ? setState({
                                   commentVisibility: !state.commentVisibility,
                               })
