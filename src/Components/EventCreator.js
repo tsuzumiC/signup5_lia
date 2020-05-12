@@ -169,8 +169,8 @@ const EventCreator = () => {
             </div>
             <Mutation
                 mutation={CREATE_EVENT}
-                onCompleted={() => {
-                    history.push("/");
+                onCompleted={({ id }) => {
+                    history.push(`/events/${id}`);
                 }}
             >
                 {(createEvent, { loading, error }) => (

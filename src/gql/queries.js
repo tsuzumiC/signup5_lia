@@ -74,7 +74,8 @@ export const GET_CACHED_EVENTS = gql`
             }
             description
             date_of_event
-            time_of_event
+            start_time_of_event
+            end_time_of_event
             location
             invitations {
                 id

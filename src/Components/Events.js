@@ -31,7 +31,7 @@ const Events = () => {
         },
         handleSubmit = (event) => {
             event.preventDefault();
-            history.push(`${match.url}/${values.inputValue}`);
+            history.push(`/events/${values.inputValue}`);
         };
     return (
         <div>
@@ -59,7 +59,8 @@ const Event = () => {
         location = useLocation(),
         address = location.pathname,
         client = useApolloClient(),
-        isInviteMatch = new RegExp(`${match.url}/[0-9]+/*`),
+        [lastErrorID, setlastErrorID] = useState(null),
+        isInviteMatch = new RegExp(`${match.url}/*[0-9]+/*`),
         isEventMatch = new RegExp(`${match.url}`),
         idMatch = new RegExp("/[0-9]+/*", "g");
     let event = null,
@@ -73,58 +74,63 @@ const Event = () => {
     } = useQuery(GET_CACHED_EVENTS);
 
     const [getEvent, { data, loading, error }] = useLazyQuery(GET_EVENT_BY_ID);
+    console.log(!!data, !!loading, !!error, lastErrorID);
 
     if (loading) {
+        if (lastErrorID !== null) {
+            setlastErrorID(null);
+        }
         return <p>{`Loading event ${eventID}`}</p>;
-    }
-    if (error) {
+    } else if (error && (eventID === lastErrorID || lastErrorID === null)) {
+        if (lastErrorID === null) {
+            setlastErrorID(eventID);
+        }
         return (
             <pre>{`Error loading event ${eventID} with response:
     ${error}`}</pre>
         );
-    }
-    if (data) {
-        if (data.getEventById.id === eventID) {
-            event = data.getEventById;
-            if (
-                !cachedEvents.find((cachedEvent) => {
-                    return _.isEqual(cachedEvent, event);
-                })
-            ) {
-                client.writeData({
-                    data: {
-                        events:
-                            cachedEvents.length > 0
-                                ? cachedEvents.concat(event)
-                                : event,
-                    },
-                });
-            }
-        } else {
-            getEvent({ variables: { id: eventID } });
+    } else if (data && data.getEventById.id === eventID) {
+        event = data.getEventById;
+        if (
+            !cachedEvents.find((cachedEvent) => {
+                return _.isEqual(cachedEvent, event);
+            })
+        ) {
+            client.writeData({
+                data: {
+                    events:
+                        cachedEvents.length > 0
+                            ? cachedEvents.concat(event)
+                            : [event],
+                },
+            });
         }
-    } else if (cachedEvents.length > 0 && !loading) {
+        if (lastErrorID !== null) {
+            setlastErrorID(null);
+        }
+    } else if (
+        !!cachedEvents.find((event) => {
+            return event.id === eventID;
+        })
+    ) {
         event = cachedEvents.find((event) => {
             return event.id === eventID;
         });
-        if (event === undefined) {
-            event = null;
-            getEvent({ variables: { id: eventID } });
+        if (lastErrorID !== null) {
+            setlastErrorID(null);
         }
-    } else if (!loading) {
+    } else {
         getEvent({ variables: { id: eventID } });
     }
 
-    if (event === null) {
-        return <p>{`Loading event ${eventID}`}</p>;
-    }
-
-    if (isInviteMatch.test(address)) {
+    if (isInviteMatch.test(address) && !!event) {
         invite = event.invitations.find((invite) => {
             return invite.id === inviteID;
         });
     }
-
+    if (event === null) {
+        return <p>{`Loading event ${eventID}`}</p>;
+    }
     return (
         <>
             <EventInfo event={event} />
