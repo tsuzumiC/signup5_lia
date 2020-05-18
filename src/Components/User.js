@@ -31,7 +31,7 @@ const User = (props) => {
                         <div>
                             {fname} {lname}
                         </div>
-                        <GetDecision decision={response[attendance]} />
+                        <GetDecision decision={attendance} />
 
                         <i
                             onClick={(event) => {
