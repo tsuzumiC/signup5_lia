@@ -20,7 +20,7 @@ const User = (props) => {
                 <div
                     className="card-header"
                     onClick={() => {
-                        comment
+                        return comment
                             ? setState({
                                   commentVisibility: !state.commentVisibility,
                               })
@@ -31,7 +31,7 @@ const User = (props) => {
                         <div>
                             {fname} {lname}
                         </div>
-                        <GetDecision decision={attendance} />
+                        <GetDecision decision={response[attendance]} />
 
                         <i
                             onClick={(event) => {
